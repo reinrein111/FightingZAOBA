@@ -1,3 +1,10 @@
+/**
+ * @file CameraFollow.cs
+ * @brief 修复人物贴墙也能旋转场景的bug
+ * @author ZHY
+ * @version 1.3
+ * @time 26-3-30 0-0-03 ~~ 26-3-30 0-
+ */
 using UnityEngine;
 
 public class CameraFollow : MonoBehaviour
@@ -10,23 +17,12 @@ public class CameraFollow : MonoBehaviour
     
     [Header("跟随平滑度")]
     public float smoothSpeed = 5f;   // 跟随速度，值越大越灵敏
+    [Header("复位判断阈值")]
+    public float resetThreshold = 0.8f; // 允许的误差范围（越小越精确）
     
     void Start()
     {
-        // 自动查找Player
-        if (target == null)
-        {
-            GameObject player = GameObject.FindGameObjectWithTag("Player");
-            if (player != null)
-            {
-                target = player.transform;
-                Debug.Log("相机自动找到Player: " + target.name);
-            }
-            else
-            {
-                Debug.LogError("未找到Player！请给Player添加Tag 'Player'");
-            }
-        }
+        GameObject player = GameObject.FindGameObjectWithTag("Player");
     }
     
     void LateUpdate()
@@ -46,5 +42,15 @@ public class CameraFollow : MonoBehaviour
         {
             transform.position = target.position + offset;
         }
+    }
+
+    public bool IsCameraReset()
+    {
+        if (target == null) return false; // 如果没有目标，直接返回 false
+
+        Vector3 targetPosition = target.position + offset;
+        float distance = Vector3.Distance(transform.position, targetPosition);
+
+        return distance <= resetThreshold; // 如果距离小于阈值，认为已复位
     }
 }
