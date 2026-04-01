@@ -50,6 +50,17 @@ public class PlayerController : MonoBehaviour
     
     public PlayerState currentState = PlayerState.Grounding;
     
+    private bool HasAnimatorParameter(string paramName)
+    {
+        if (animator == null) return false;
+        var parameters = animator.parameters;
+        for (int i = 0; i < parameters.Length; i++)
+        {
+            if (parameters[i].name == paramName) return true;
+        }
+        return false;
+    }
+
     void Start()
     {
         initializeRigidBody(); // 3项常规初始化，若没有则添加，DEMO中早已手动添加，通常没用
@@ -265,7 +276,7 @@ public class PlayerController : MonoBehaviour
         }*/
         
         // 4. 清理不需要的动画标志
-        if (currentState != PlayerState.Rotating && animator.GetBool("isRotating"))
+        if (currentState != PlayerState.Rotating && HasAnimatorParameter("isRotating") && animator.GetBool("isRotating"))
         {
             animator.SetBool("isRotating", false);
         }
@@ -279,27 +290,27 @@ public class PlayerController : MonoBehaviour
             case PlayerState.Grounding:
                 // 着陆：停止跳跃/下落动画
                 animator.SetBool("isGrounded", true);
-                animator.SetBool("isJumping", false);
-                animator.SetBool("isFalling", false);
+                if (HasAnimatorParameter("isJumping")) animator.SetBool("isJumping", false);
+                if (HasAnimatorParameter("isFalling")) animator.SetBool("isFalling", false);
                 break;
                 
             case PlayerState.Jumping:
                 // 跳跃：播放跳跃动画
                 animator.SetBool("isGrounded", false);
-                animator.SetBool("isJumping", true);
-                animator.SetBool("isFalling", false);
+                if (HasAnimatorParameter("isJumping")) animator.SetBool("isJumping", true);
+                if (HasAnimatorParameter("isFalling")) animator.SetBool("isFalling", false);
                 break;
                 
             case PlayerState.Falling:
                 // 下落：播放下落动画
                 animator.SetBool("isGrounded", false);
-                animator.SetBool("isJumping", false);
-                animator.SetBool("isFalling", true);
+                if (HasAnimatorParameter("isJumping")) animator.SetBool("isJumping", false);
+                if (HasAnimatorParameter("isFalling")) animator.SetBool("isFalling", true);
                 break;
                 
             case PlayerState.Rotating:
                 // 旋转：播放旋转动画
-                animator.SetBool("isRotating", true);
+                if (HasAnimatorParameter("isRotating")) animator.SetBool("isRotating", true);
                 break;
         }
     }

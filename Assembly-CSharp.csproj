@@ -80,6 +80,7 @@
     <Compile Include="Assets\Prefabs\chen_littles\chen_player\PlayerShield.cs" />
     <Compile Include="Assets\Prefabs\chen_littles\teacher\Bullet.cs" />
     <Compile Include="Assets\Prefabs\chen_littles\infrared_system\Changeableplatform.cs" />
+    <Compile Include="Assets\Scripts\CompassRotate.cs" />
     <Compile Include="Assets\Prefabs\chen_littles\infrared_system\proximitybutton.cs" />
   </ItemGroup>
   <ItemGroup>

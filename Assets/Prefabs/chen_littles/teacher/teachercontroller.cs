@@ -20,6 +20,9 @@ public class TeacherController : MonoBehaviour
     private float nextFireTime;
     private bool isTracking = false;    // 是否处于攻击锁定状态
 
+    private Animator anim; // 【新增】控制动画状态机
+    private int lastState = -1; // 【新增】用于记录上一个状态，防止动画重播
+
     void Start()
     {
         // 自动寻找场景中带 Player 标签的玩家
@@ -29,6 +32,10 @@ public class TeacherController : MonoBehaviour
         // 安全检查：如果 Inspector 没拖，尝试自动获取
         if (visual_sprite == null)
             visual_sprite = GetComponentInChildren<SpriteRenderer>();
+
+        // 【新增】获取 Animator 组件
+        if (visual_sprite != null)
+            anim = visual_sprite.GetComponent<Animator>();
     }
 
     void Update()
@@ -67,6 +74,14 @@ public class TeacherController : MonoBehaviour
             teacherState = 2;
             isTracking = true;
             LookAtPlayer();
+        }
+
+        // 【修改】只有当状态真正发生变化时，才更新 Animator 参数
+        // 这样可以防止每一帧都重新启动当前动画，导致动画播不完
+        if (anim != null && teacherState != lastState)
+        {
+            anim.SetInteger("Teacher State", teacherState);
+            lastState = teacherState;
         }
 
         // --- 3. 执行攻击行为 ---
