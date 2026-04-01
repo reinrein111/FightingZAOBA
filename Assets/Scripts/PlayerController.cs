@@ -351,9 +351,9 @@ public class PlayerController : MonoBehaviour
             faceDirection = move;
             
             // 翻转角色方向
-        /*    Vector3 scale = transform.localScale;
+          Vector3 scale = transform.localScale;
             scale.x = Mathf.Abs(scale.x) * Mathf.Sign(faceDirection);
-            transform.localScale = scale;*/
+            transform.localScale = scale;
         }
     }
 
