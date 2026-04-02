@@ -457,7 +457,7 @@ public class PlayerController : MonoBehaviour
 
         if (jumpPressed)
         {
-            rb.AddForce(Vector2.up * jumpForce / 2f, ForceMode2D.Impulse);
+            rb.AddForce(Vector2.up * jumpForce / 1.5f, ForceMode2D.Impulse);
             changeState(PlayerState.Jumping);
             jumpTimer = Time.time;
         }

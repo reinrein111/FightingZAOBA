@@ -1,51 +1,172 @@
 using UnityEngine;
-using UnityEngine.SceneManagement; // 用于切换关卡
+using System.Collections;
 
 public class SchoolGate : MonoBehaviour
 {
-    public float openDistance = 1.5f; // 感应距离
-    public string nextSceneName = "WinScene"; // 胜利后的场景名
+    public enum GateType { Girl, Boy }
+    public GateType gateType = GateType.Girl;
 
-    private Transform player;
+    public float openDistance = 1.5f;
+
+    [Header("相机过渡设置")]
+    public float transitionDuration = 1f;
+
+    private Transform player1;
+    private Transform player2;
+    private bool hasTriggered = false;
+
+    public Camera girlCamera;
+    public Camera boyCamera;
+
+    private float originalBoySize;
+    private Rect originalBoyRect;
 
     void Start()
     {
-        GameObject p = GameObject.FindGameObjectWithTag("Player");
-        if (p != null) player = p.transform;
+        GameObject p1 = GameObject.Find("Player1");
+        if (p1 != null) player1 = p1.transform;
+        GameObject p2 = GameObject.Find("Player2");
+        if (p2 != null) player2 = p2.transform;
+
+        SetupCameras();
+    }
+
+    private void SetupCameras()
+    {
+        Camera[] cameras = FindObjectsOfType<Camera>();
+        foreach (Camera cam in cameras)
+        {
+            PlayerCameraController pcc = cam.GetComponent<PlayerCameraController>();
+            if (pcc != null)
+            {
+                if (pcc.targetPlayerId == 1)
+                    girlCamera = cam;
+                else if (pcc.targetPlayerId == 2)
+                    boyCamera = cam;
+            }
+        }
+
+        if (boyCamera != null)
+        {
+            originalBoySize = boyCamera.orthographicSize;
+            originalBoyRect = boyCamera.rect;
+        }
     }
 
     void Update()
     {
-        if (player == null) return;
+        if (hasTriggered) return;
 
-        float dist = Vector2.Distance(transform.position, player.position);
+        if (gateType == GateType.Girl)
+        {
+            CheckGateAccess(player1, inv => inv.hasCard_Girl, "女孩卡片");
+        }
+        else
+        {
+            CheckGateAccess(player2, inv => inv.hasCard_Boy, "男孩卡片");
+        }
+    }
+
+    private void CheckGateAccess(Transform targetPlayer, System.Func<PlayerInventory, bool> cardCheck, string cardName)
+    {
+        if (targetPlayer == null) return;
+
+        float dist = Vector2.Distance(transform.position, targetPlayer.position);
         if (dist < openDistance)
         {
-            PlayerInventory inv = player.GetComponent<PlayerInventory>();
-            
-            if (inv != null && inv.hasCampusCard)
+            PlayerInventory inv = targetPlayer.GetComponent<PlayerInventory>();
+
+            if (inv != null && cardCheck(inv))
             {
-                Debug.Log("<color=green>校园卡验证通过！门已打开。</color>");
-                WinGame();
+                Debug.Log($"<color=green>{cardName}验证通过！{targetPlayer.name}可以通过{gameObject.name}。</color>");
+                hasTriggered = true;
+                targetPlayer.gameObject.SetActive(false);
+                StartCoroutine(SmoothCameraTransition());
             }
             else
             {
-                // 如果没卡，可以这里加个提示，比如“请先寻找校园卡”
-                Debug.Log("门锁着，你需要校园卡才能进入。");
+                Debug.Log($"{cardName}门锁着，{targetPlayer.name}需要{cardName}才能进入。");
             }
         }
     }
 
-    void WinGame()
+    private IEnumerator SmoothCameraTransition()
     {
-        // 这里执行胜利逻辑，比如加载下一关或者弹出结算界面
-        // SceneManager.LoadScene(nextSceneName); 
-        Debug.Log("恭喜通关！");
+        if (gateType == GateType.Girl)
+        {
+            if (girlCamera != null)
+            {
+                girlCamera.gameObject.SetActive(false);
+            }
+
+            if (boyCamera != null)
+            {
+                float startSize = boyCamera.orthographicSize;
+                Rect startRect = boyCamera.rect;
+                Rect targetRect = new Rect(0, 0, 1, 1);
+                float targetSize = originalBoySize;
+
+                float elapsed = 0f;
+                while (elapsed < transitionDuration)
+                {
+                    elapsed += Time.deltaTime;
+                    float t = elapsed / transitionDuration;
+                    float smoothT = Mathf.SmoothStep(0f, 1f, t);
+
+                    boyCamera.rect = LerpRect(startRect, targetRect, smoothT);
+                    boyCamera.orthographicSize = Mathf.Lerp(startSize, targetSize, smoothT);
+                    yield return null;
+                }
+
+                boyCamera.rect = targetRect;
+                boyCamera.orthographicSize = targetSize;
+            }
+        }
+        else
+        {
+            if (boyCamera != null)
+            {
+                boyCamera.gameObject.SetActive(false);
+            }
+
+            if (girlCamera != null)
+            {
+                float startSize = girlCamera.orthographicSize;
+                Rect startRect = girlCamera.rect;
+                Rect targetRect = new Rect(0, 0, 1, 1);
+                float targetSize = originalBoySize;
+
+                float elapsed = 0f;
+                while (elapsed < transitionDuration)
+                {
+                    elapsed += Time.deltaTime;
+                    float t = elapsed / transitionDuration;
+                    float smoothT = Mathf.SmoothStep(0f, 1f, t);
+
+                    girlCamera.rect = LerpRect(startRect, targetRect, smoothT);
+                    girlCamera.orthographicSize = Mathf.Lerp(startSize, targetSize, smoothT);
+                    yield return null;
+                }
+
+                girlCamera.rect = targetRect;
+                girlCamera.orthographicSize = targetSize;
+            }
+        }
+    }
+
+    private Rect LerpRect(Rect a, Rect b, float t)
+    {
+        return new Rect(
+            Mathf.Lerp(a.x, b.x, t),
+            Mathf.Lerp(a.y, b.y, t),
+            Mathf.Lerp(a.width, b.width, t),
+            Mathf.Lerp(a.height, b.height, t)
+        );
     }
 
     private void OnDrawGizmos()
     {
-        Gizmos.color = Color.green;
+        Gizmos.color = gateType == GateType.Girl ? Color.magenta : Color.cyan;
         Gizmos.DrawWireCube(transform.position, new Vector3(openDistance, openDistance, 0));
     }
 }

@@ -8,21 +8,22 @@ public class ProximityButton : MonoBehaviour
     [Header("探测设置")]
     public float detectRange = 3f; // 探测半径，建议设为 3 左右
     public Color activeColor = Color.red; // 激活时的按钮颜色
-    
-    private Transform player;
+
+    private Transform player1;
+    private Transform player2;
     private SpriteRenderer sr;
     private Color originalColor;
 
     void Start()
     {
-        // 自动寻找玩家
-        GameObject p = GameObject.FindGameObjectWithTag("Player");
-        if (p != null) player = p.transform;
-        
+        GameObject p1 = GameObject.Find("Player1");
+        if (p1 != null) player1 = p1.transform;
+        GameObject p2 = GameObject.Find("Player2");
+        if (p2 != null) player2 = p2.transform;
+
         sr = GetComponent<SpriteRenderer>();
         if (sr != null) originalColor = sr.color;
 
-        // 初始化检查
         if (targetPlatform == null)
         {
             Debug.LogError($"物体 {gameObject.name} 未关联目标平台！");
@@ -31,20 +32,19 @@ public class ProximityButton : MonoBehaviour
 
 void Update()
 {
-    if (player == null || targetPlatform == null) return;
+    if (targetPlatform == null) return;
 
-    float dist = Vector2.Distance(transform.position, player.position);
+    bool player1InRange = player1 != null && Vector2.Distance(transform.position, player1.position) < detectRange;
+    bool player2InRange = player2 != null && Vector2.Distance(transform.position, player2.position) < detectRange;
 
-    if (dist < detectRange)
+    if (player1InRange || player2InRange)
     {
-        // 只有进入范围才会触发
         targetPlatform.SetPlatformState(true);
         if (sr != null) sr.color = activeColor;
-        // Debug.Log("玩家进入范围，触发平台！"); // 调试用
+        Debug.Log("玩家进入范围，触发平台！");
     }
     else
     {
-        // 离开范围恢复虚体
         targetPlatform.SetPlatformState(false);
         if (sr != null) sr.color = originalColor;
     }
