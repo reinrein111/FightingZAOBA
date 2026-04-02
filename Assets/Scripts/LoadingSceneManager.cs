@@ -1,6 +1,5 @@
 using UnityEngine;
 using UnityEngine.SceneManagement;
-using UnityEngine.UI;
 using TMPro;
 using System.Collections;
 
@@ -9,76 +8,60 @@ public class LoadingScreenManager : MonoBehaviour
     public static string sceneToLoad = SceneNames.MAP_0;
     
     [Header("UI引用")]
-    public Slider progressBar;
-    public TextMeshProUGUI percentageText;
+    public TextMeshProUGUI storyText;
     
-    [Header("设置")]
-    public bool requireKeyPress = true;
+    [Header("打字机设置")]
+    [Tooltip("每个字符的显示间隔（秒）")]
+    public float typewriterSpeed = 0.05f;
+    
+    [Tooltip("完整故事文本")]
+    [TextArea(10, 20)]
+    public string fullStory;
+    
+    private Coroutine typewriterCoroutine;
+    private bool isTyping;
+    private int totalCharacters;
     
     private void Start()
     {
-        if (progressBar == null)
+        if (storyText == null)
         {
-            Debug.LogError("LoadingScreenManager: progressBar 未赋值！");
-        }
-        if (percentageText == null)
-        {
-            Debug.LogError("LoadingScreenManager: percentageText 未赋值！");
+            Debug.LogError("LoadingScreenManager: storyText 未赋值！");
+            return;
         }
         
-        StartCoroutine(LoadSceneAsyncProcess(sceneToLoad));
+        storyText.text = fullStory;
+        storyText.ForceMeshUpdate(true, true);
+        totalCharacters = storyText.textInfo.characterCount;
+        storyText.maxVisibleCharacters = 0;
+        
+        typewriterCoroutine = StartCoroutine(TypewriterEffect());
     }
     
-    private IEnumerator LoadSceneAsyncProcess(string sceneName)
+    private IEnumerator TypewriterEffect()
     {
-        if (string.IsNullOrEmpty(sceneName))
-        {
-            Debug.LogError("LoadingScreenManager: sceneToLoad 为空，使用默认场景 MAP_0");
-            sceneName = SceneNames.MAP_0;
-        }
-
-        AsyncOperation asyncLoad = SceneManager.LoadSceneAsync(sceneName);
+        isTyping = true;
         
-        if (asyncLoad == null)
+        for (int i = 0; i <= totalCharacters; i++)
         {
-            Debug.LogError($"LoadingScreenManager: 无法加载场景 '{sceneName}'，请检查场景是否已添加到 Build Settings！");
-            yield break;
+            storyText.maxVisibleCharacters = i;
+            yield return new WaitForSeconds(typewriterSpeed);
         }
         
-        asyncLoad.allowSceneActivation = false;
-        
-        while (!asyncLoad.isDone)
+        isTyping = false;
+    }
+    
+    public void SkipStory()
+    {
+        if (isTyping)
         {
-            float progress = Mathf.Clamp01(asyncLoad.progress / 0.9f);
-            
-            if (progressBar != null)
-            {
-                progressBar.value = progress;
-            }
-            if (percentageText != null)
-            {
-                percentageText.text = $"Loading... {Mathf.RoundToInt(progress * 100)}%";
-            }
-            
-            if (asyncLoad.progress >= 0.9f)
-            {
-                if (requireKeyPress)
-                {
-                    if (percentageText != null)
-                    {
-                        percentageText.text = "Press Space to continue...";
-                    }
-                    if (Input.GetKeyDown(KeyCode.Space))
-                    {
-                        asyncLoad.allowSceneActivation = true;
-                    }
-                }
-                else
-                {
-                    asyncLoad.allowSceneActivation = true;
-                }
-            }
-            yield return null;
+            StopCoroutine(typewriterCoroutine);
+            storyText.maxVisibleCharacters = totalCharacters;
+            isTyping = false;
+        }
+        else
+        {
+            SceneManager.LoadScene(SceneNames.MAP_0);
         }
     }
 }
