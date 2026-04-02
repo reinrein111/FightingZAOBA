@@ -2058,6 +2058,10 @@ PrefabInstance:
       value: 0.504707
       objectReference: {fileID: 0}
     - target: {fileID: 2690396106247679765, guid: 2562d1d69863b4a4c909e521bfe5f1bd, type: 3}
+      propertyPath: haloAlphaOff
+      value: 0.344
+      objectReference: {fileID: 0}
+    - target: {fileID: 2690396106247679765, guid: 2562d1d69863b4a4c909e521bfe5f1bd, type: 3}
       propertyPath: activeColor.b
       value: 0.84276724
       objectReference: {fileID: 0}
