@@ -1,5 +1,9 @@
 fileFormatVersion: 2
+<<<<<<< Updated upstream:Assets/Prefabs/chen_littles/compass/compass_prefab/CompassRotate.cs.meta
 guid: XHMcsSqvBXvOcF1BF1LttrQpDi6Eww3jRNmzRCDrByeCJVb+rUw/Njo=
+=======
+guid: d526c610150d92043885ad2b59665574
+>>>>>>> Stashed changes:Assets/Scripts/CompassRotate.cs.meta
 MonoImporter:
   externalObjects: {}
   serializedVersion: 2

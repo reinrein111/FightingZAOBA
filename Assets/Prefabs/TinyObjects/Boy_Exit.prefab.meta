@@ -1,6 +1,12 @@
 fileFormatVersion: 2
+<<<<<<<< Updated upstream:Assets/Prefabs/TinyObjects/Boy_Exit.prefab.meta
 guid: Xigbti6tWimZscpBUivNId49YWjIUU7czRE1u5rxBxJOuvjwKbru1EI=
 PrefabImporter:
+========
+guid: DykYvHyqACkgjIySQKq8pTbeTeibc6jc3iCkL7+qcT99lSiK0mV2kOQ=
+folderAsset: yes
+DefaultImporter:
+>>>>>>>> Stashed changes:Assets/TextMesh Pro.meta
   externalObjects: {}
   userData: 
   assetBundleName: 

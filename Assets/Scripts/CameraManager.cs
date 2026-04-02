@@ -103,7 +103,11 @@ public class CameraManager : MonoBehaviour
     /// <summary>
     /// 设置相机Viewport（分屏显示）
     /// </summary>
+<<<<<<< Updated upstream
     private void SetupViewports()
+=======
+    public void SetupViewports()
+>>>>>>> Stashed changes
     {
         if (!useSplitScreen) return;
         
