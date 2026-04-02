@@ -89,7 +89,7 @@ void CheckDeathCollision()
     {
         Debug.Log("<color=red>玩家死于笔尖刺杀！</color>");
         // 触发你现有的死亡逻辑
-        Object.FindAnyObjectByType<SpikeTrigger>()?.ExecuteDeath();
+        Object.FindAnyObjectByType<SpikeTrigger>()?.ExecuteDeath(playerObj.GetComponent<PlayerController>());
     }
 
     // 在 Scene 窗口画出红色的危险方块，方便你调整大小

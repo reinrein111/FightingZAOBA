@@ -11,7 +11,7 @@ public class SharpTip : MonoBehaviour
             Debug.Log("<color=red>玩家碰到笔尖，瞬间暴毙！</color>");
             
             // 3. 执行死亡逻辑（调用你现有的尖刺致死脚本）
-            Object.FindAnyObjectByType<SpikeTrigger>()?.ExecuteDeath();
+            Object.FindAnyObjectByType<SpikeTrigger>()?.ExecuteDeath(other.GetComponent<PlayerController>());
             
             // 可选：让玩家物理静止，防止穿过去
             Rigidbody2D playerRb = other.GetComponent<Rigidbody2D>();

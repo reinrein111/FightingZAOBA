@@ -130,7 +130,7 @@ public class TeacherController : MonoBehaviour
         SpikeTrigger st = Object.FindAnyObjectByType<SpikeTrigger>();
         if (st != null)
         {
-            st.ExecuteDeath();
+            st.ExecuteDeath(player.GetComponent<PlayerController>());
         }
     }
 

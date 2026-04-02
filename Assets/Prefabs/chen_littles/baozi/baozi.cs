@@ -6,27 +6,33 @@ public class Baozi : MonoBehaviour
     public float eatDistance = 0.8f; // 玩家离包子多近算“吃掉”
     public int shieldAmount = 5;    // 增加的护盾层数
 
-    private Transform player;
+    public Transform player1 = null;
+    public Transform player2 = null;
 
     void Start()
     {
         // 自动寻找玩家
-        GameObject p = GameObject.FindGameObjectWithTag("Player");
-        if (p != null) player = p.transform;
+        GameObject p1 = GameObject.Find("Player1");
+        if (p1 != null) player1 = p1.transform;
+        GameObject p2 = GameObject.Find("Player2");
+        if (p2 != null) player2 = p2.transform;
     }
 
     void Update()
     {
-        if (player == null) return;
 
         // 1. 计算 2D 平面距离（忽略 Z 轴）
-        float dist = Vector2.Distance(
+        float dist1 = Vector2.Distance(
             new Vector2(transform.position.x, transform.position.y),
-            new Vector2(player.position.x, player.position.y)
+            new Vector2(player1.position.x, player1.position.y)
+        );
+        float dist2 = Vector2.Distance(
+            new Vector2(transform.position.x, transform.position.y),
+            new Vector2(player2.position.x, player2.position.y)
         );
 
         // 2. 判定：如果进入范围
-        if (dist < eatDistance)
+        if (dist1 < eatDistance || dist2 < eatDistance)
         {
             EatMe();
         }
@@ -34,14 +40,32 @@ public class Baozi : MonoBehaviour
 
     void EatMe()
     {
-        PlayerShield ps = player.GetComponent<PlayerShield>();
-        if (ps != null)
+        bool hasPlayer = false;
+
+        if (player1 != null)
         {
-            ps.AddShield(shieldAmount);
+            PlayerShield ps1 = player1.GetComponent<PlayerShield>();
+            if (ps1 != null)
+            {
+                ps1.AddShield(shieldAmount);
+                hasPlayer = true;
+            }
+        }
+
+        if (player2 != null)
+        {
+            PlayerShield ps2 = player2.GetComponent<PlayerShield>();
+            if (ps2 != null)
+            {
+                ps2.AddShield(shieldAmount);
+                hasPlayer = true;
+            }
+        }
+
+        if (hasPlayer)
+        {
             Debug.Log("<color=cyan>【包子】已被吃掉！</color>");
-            
-            // 销毁包子
-            Destroy(gameObject); 
+            Destroy(gameObject);
         }
         else
         {
