@@ -234,7 +234,7 @@ public class PlayerController : MonoBehaviour
     {
         float width = playerCollider.size.x; // 取碰撞箱的宽度
 
-        Vector2 centerPos = new Vector2(groundCheck.position.x, groundCheck.position.y - 0.2f); // 左中右设置三个检测点
+        Vector2 centerPos = new Vector2(groundCheck.position.x, groundCheck.position.y - 0.1f); // 左中右设置三个检测点
         Vector2 leftPoint = new Vector2(centerPos.x - width/3, centerPos.y);
         Vector2 rightPoint = new Vector2(centerPos.x + width/3, centerPos.y); 
 

@@ -6,7 +6,7 @@
  * @time 26-4-2
  */
 using UnityEngine;
-
+using UnityEngine.UI;
 public class CameraManager : MonoBehaviour
 {
     [Header("相机引用")]
@@ -17,6 +17,18 @@ public class CameraManager : MonoBehaviour
     [Header("分屏配置")]
     public bool useSplitScreen = true;  // 是否使用分屏显示
     public SplitScreenMode splitMode = SplitScreenMode.ThreeWay;
+    
+    [Header("边框设置")]
+    public float borderSize = 0.0002f;   // 边框大小
+    public Color borderColor = Color.black; // 边框颜色
+
+    [Header("边框引用（已在Scene中创建）")]
+    public GameObject borderCanvas;     // 边框画布
+    public GameObject midBorder;         // 中央边框
+    public GameObject topBorder;        // 顶边框
+    public GameObject bottomBorder;     // 底边框
+    public GameObject LeftEdgeBorder;        // 屏幕最左侧边框
+    public GameObject RightEdgeBorder;       // 屏幕最右侧边框
     
     [Header("相机参数")]
     public float mainCameraSize = 12f;  // 主相机视野大小
@@ -39,15 +51,14 @@ public class CameraManager : MonoBehaviour
     /// </summary>
     private void InitializeCameras()
     {
-        // 查找或创建相机
         if (mainCamera == null)
         {
             mainCamera = Camera.main;
         }
         
-        // 确保所有相机都有对应的控制器
         SetupMainCamera();
         SetupPlayerCameras();
+        CreateBorders();
     }
     
     /// <summary>
@@ -128,12 +139,12 @@ public class CameraManager : MonoBehaviour
     {   
         if (cameraA != null)
         {
-            cameraA.rect = new Rect(0, 0, 0.5f, 1f);
+            cameraA.rect = new Rect(0, 0, 0.5f - borderSize, 1f);
         }
         
         if (cameraB != null)
         {
-            cameraB.rect = new Rect(0.5f, 0, 0.5f, 1f);
+            cameraB.rect = new Rect(0.5f + borderSize, 0, 0.5f - borderSize, 1f);
         }
     }
     
@@ -160,6 +171,62 @@ public class CameraManager : MonoBehaviour
         }
     }
     
+    private void CreateBorders()
+    {
+        if (borderCanvas != null)
+        {
+            borderCanvas.SetActive(useSplitScreen && borderSize > 0);
+        }
+
+        if (!useSplitScreen || borderSize <= 0) return;
+
+        if (midBorder != null)
+        {
+            midBorder.SetActive(true);
+            //SetupBorderImage(midBorder, new Rect(0.5f - borderSize * 0.5f, 0, borderSize, 1));
+        }
+
+        if (topBorder != null)
+        {
+            topBorder.SetActive(true);
+            //SetupBorderImage(topBorder, new Rect(0, 1f - borderSize, 1f, borderSize));
+        }
+
+        if (bottomBorder != null)
+        {
+            bottomBorder.SetActive(true);
+            //SetupBorderImage(bottomBorder, new Rect(0, 0, 1f, borderSize));
+        }
+
+        if (LeftEdgeBorder != null)
+        {
+            LeftEdgeBorder.SetActive(true);
+            //SetupBorderImage(LeftEdgeBorder, new Rect(0, 0, borderSize, 1));
+        }
+
+        if (RightEdgeBorder != null)
+        {
+            RightEdgeBorder.SetActive(true);
+            //SetupBorderImage(RightEdgeBorder, new Rect(1f - borderSize, 0, borderSize, 1));
+        }
+    }
+    /*private void SetupBorderImage(GameObject borderObj, Rect rect)
+    {
+        RectTransform rt = borderObj.GetComponent<RectTransform>();
+        if (rt == null) return;
+
+        rt.anchorMin = rect.position;
+        rt.anchorMax = rect.position + rect.size;
+        rt.anchoredPosition = Vector2.zero;
+        rt.sizeDelta = Vector2.zero;
+
+        Image img = borderObj.GetComponent<Image>();
+        if (img != null)
+        {
+            img.color = borderColor;
+        }
+    }*/
+    
     /// <summary>
     /// 切换分屏模式
     /// </summary>
@@ -167,6 +234,7 @@ public class CameraManager : MonoBehaviour
     {
         splitMode = mode;
         SetupViewports();
+        CreateBorders();
     }
     
     /// <summary>

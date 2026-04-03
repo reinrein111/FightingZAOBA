@@ -1,3 +1,4 @@
+
 using UnityEngine;
 using System.Collections;
 using UnityEngine.UI;
@@ -12,11 +13,12 @@ public class SpikeTrigger : MonoBehaviour
     public float shakeDuration = 1f;
     public float shakeStrength = 0.4f;
     public float fadeDuration = 1f;
-    public float respawnDelay = 0.5f;
+    public float resetDelay = 0.5f;
 
     private PlayerController player1;
     private PlayerController player2;
     private PlayerController triggeredPlayer;
+    private int deadPlayerCount = 0;
     private bool hasTriggered = false;
 
     void Start()
@@ -40,12 +42,21 @@ public class SpikeTrigger : MonoBehaviour
 
     public void ExecuteDeath(PlayerController player)
     {
-        if (hasTriggered) return;
+        if (player == null) return;
 
         if (player != player1 && player != player2) return;
 
+        if (player == player1 && player1 != null)
+        {
+            player1.gameObject.SetActive(false);
+        }
+        else if (player == player2 && player2 != null)
+        {
+            player2.gameObject.SetActive(false);
+        }
+
         triggeredPlayer = player;
-        hasTriggered = true;
+        deadPlayerCount++;
         StartCoroutine(TriggerSequence());
     }
 
@@ -53,28 +64,26 @@ public class SpikeTrigger : MonoBehaviour
     {
         if (hasTriggered) return;
 
-        PlayerController player = collision.GetComponent<PlayerController>();
-        if (player != null && (player == player1 || player == player2))
+        if (collision.CompareTag("Player"))
         {
-            ExecuteDeath(player);
+            PlayerController player = collision.GetComponent<PlayerController>();
+            if (player != null)
+            {
+                ExecuteDeath(player);
+            }
         }
     }
 
     IEnumerator TriggerSequence()
     {
-        if (triggeredPlayer != null) triggeredPlayer.gameObject.SetActive(false);
-
         StartCoroutine(ShakeCamera());
         yield return StartCoroutine(FadeRedOverlay());
 
-        yield return new WaitForSeconds(respawnDelay);
-
-        if (LevelManager.Instance != null)
+        if (deadPlayerCount >= 2)
         {
-            LevelManager.Instance.RespawnBothPlayers();
+            yield return new WaitForSeconds(resetDelay);
+            ResetGame();
         }
-
-        hasTriggered = false;
     }
 
     IEnumerator ShakeCamera()
@@ -110,5 +119,12 @@ public class SpikeTrigger : MonoBehaviour
             }
             redOverlay.alpha = 0f;
         }
+    }
+
+    void ResetGame()
+    {
+        UnityEngine.SceneManagement.SceneManager.LoadScene(
+            UnityEngine.SceneManagement.SceneManager.GetActiveScene().name
+        );
     }
 }
