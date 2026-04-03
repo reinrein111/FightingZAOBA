@@ -69,10 +69,7 @@ public class LevelManager : MonoBehaviour
 
     private Transform player1;
     private Transform player2;
-<<<<<<< Updated upstream
-=======
     private GameObject thanksForPlayingUI;
->>>>>>> Stashed changes
 
     void Awake()
     {
@@ -303,8 +300,6 @@ public class LevelManager : MonoBehaviour
         if (currentLevelIndex >= levels.Length)
         {
             currentLevelIndex = levels.Length - 1;
-<<<<<<< Updated upstream
-=======
             GameObject thanksForPlaying = GameObject.Find("ThanksForPlaying");
             if (thanksForPlaying != null)
             {
@@ -312,7 +307,6 @@ public class LevelManager : MonoBehaviour
             }
             isTransitioning = true;
             yield break;
->>>>>>> Stashed changes
         }
 
         ResetBothPlayers();

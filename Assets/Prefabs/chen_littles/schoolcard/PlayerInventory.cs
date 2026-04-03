@@ -2,12 +2,6 @@ using UnityEngine;
 
 public class PlayerInventory : MonoBehaviour
 {
-<<<<<<< Updated upstream
-    [Header("物品清单")]
-    public bool hasCard_Girl = false;
-    public bool hasCard_Boy = false;
-}
-=======
     public PlayerStatusUI statusUI; // 👈 必须在 Inspector 里拖入该玩家对应的 HUD
 
     [Header("物品清单状态")]
@@ -33,4 +27,3 @@ public class PlayerInventory : MonoBehaviour
         }
     }
 }
->>>>>>> Stashed changes

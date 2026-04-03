@@ -1,13 +1,5 @@
 fileFormatVersion: 2
-<<<<<<< Updated upstream
-<<<<<<<< Updated upstream:Assets/Scenes/RootObject_Map2.prefab.meta
 guid: 1a5d240a5860e9e4b97ada8102c1086a
-========
-guid: 7795403676955744b85ac258b121b8cd
->>>>>>>> Stashed changes:Assets/Scenes/RootObject_Map1.prefab.meta
-=======
-guid: 1a5d240a5860e9e4b97ada8102c1086a
->>>>>>> Stashed changes
 PrefabImporter:
   externalObjects: {}
   userData: 
