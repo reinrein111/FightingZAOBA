@@ -30,40 +30,22 @@ public class PlayersManager : MonoBehaviour
             FindPlayersInChildren();
         }
 
-        if (LevelManager.Instance != null && LevelManager.Instance.levels != null)
+        if (player1 != null && player2 != null)
         {
-            var level = LevelManager.Instance.levels[LevelManager.Instance.currentLevelIndex];
-            if (level != null)
-            {
-                if (player1 != null)
-                {
-                    player1.playerId = 1;
-                    player1.transform.position = level.player1SpawnPos;
-                }
-
-                if (player2 != null)
-                {
-                    player2.playerId = 2;
-                    player2.transform.position = level.player2SpawnPos;
-                }
-
-                if (rotationSystem != null && level.worldRoot != null)
-                {
-                    rotationSystem.worldRoot = level.worldRoot;
-                }
-            }
+            Physics2D.IgnoreCollision(
+                player1.GetComponent<BoxCollider2D>(),
+                player2.GetComponent<BoxCollider2D>()
+            );
         }
-        else
-        {
-            if (player1 != null)
-            {
-                player1.playerId = 1;
-            }
 
-            if (player2 != null)
-            {
-                player2.playerId = 2;
-            }
+        if (player1 != null)
+        {
+            player1.playerId = 1;
+        }
+
+        if (player2 != null)
+        {
+            player2.playerId = 2;
         }
     }
 

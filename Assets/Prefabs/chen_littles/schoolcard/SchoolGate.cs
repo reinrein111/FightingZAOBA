@@ -10,7 +10,7 @@ public class SchoolGate : MonoBehaviour
 
     private Transform player1;
     private Transform player2;
-    private bool hasTriggered = false;
+    private bool isPlayerAtGate = false;
 
     public Camera girlCamera;
     public Camera boyCamera;
@@ -43,8 +43,6 @@ public class SchoolGate : MonoBehaviour
 
     void Update()
     {
-        if (hasTriggered) return;
-
         if (gateType == GateType.Girl)
         {
             CheckGateAccess(player1, inv => inv.hasCard_Girl, "女孩卡片", 1);
@@ -60,27 +58,55 @@ public class SchoolGate : MonoBehaviour
         if (targetPlayer == null) return;
 
         float dist = Vector2.Distance(transform.position, targetPlayer.position);
-        if (dist < openDistance)
+        bool isAtGate = dist < openDistance;
+
+        if (isAtGate)
         {
             PlayerInventory inv = targetPlayer.GetComponent<PlayerInventory>();
 
             if (inv != null && cardCheck(inv))
             {
-                Debug.Log($"<color=green>{cardName}验证通过！{targetPlayer.name}已通过{gameObject.name}。</color>");
-                hasTriggered = true;
-
-                targetPlayer.gameObject.SetActive(false);
-                Debug.Log($"<color=orange>{targetPlayer.name}已消失，相机停留在当前位置</color>");
+                if (!isPlayerAtGate)
+                {
+                    Debug.Log($"<color=green>{cardName}验证通过！{targetPlayer.name}已到达{gameObject.name}。</color>");
+                }
+                isPlayerAtGate = true;
 
                 if (LevelManager.Instance != null)
                 {
-                    LevelManager.Instance.PlayerPassedGate(playerId);
+                    LevelManager.Instance.UpdatePlayerAtGate(playerId, true);
                 }
             }
             else
             {
-                Debug.Log($"{cardName}门锁着，{targetPlayer.name}需要{cardName}才能进入。");
+                isPlayerAtGate = false;
+                if (LevelManager.Instance != null)
+                {
+                    LevelManager.Instance.UpdatePlayerAtGate(playerId, false);
+                }
             }
+        }
+        else
+        {
+            if (isPlayerAtGate)
+            {
+                Debug.Log($"<color=orange>{targetPlayer.name}离开了{gameObject.name}</color>");
+            }
+            isPlayerAtGate = false;
+            if (LevelManager.Instance != null)
+            {
+                LevelManager.Instance.UpdatePlayerAtGate(playerId, false);
+            }
+        }
+    }
+
+    public void HidePassedPlayer(int playerId)
+    {
+        Transform targetPlayer = (playerId == 1) ? player1 : player2;
+        if (targetPlayer != null)
+        {
+            targetPlayer.gameObject.SetActive(false);
+            Debug.Log($"<color=orange>{targetPlayer.name}已消失</color>");
         }
     }
 
