@@ -61,7 +61,8 @@ public class LoadingScreenManager : MonoBehaviour
         }
         else
         {
-            SceneManager.LoadScene(SceneNames.MAP_0);
+            string targetScene = string.IsNullOrEmpty(sceneToLoad) ? SceneNames.MAP_0 : sceneToLoad;
+            SceneManager.LoadScene(targetScene);
         }
     }
 }

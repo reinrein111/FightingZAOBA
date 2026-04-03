@@ -38,40 +38,14 @@ public class PlayersManager : MonoBehaviour
             );
         }
 
-        if (LevelManager.Instance != null && LevelManager.Instance.levels != null)
+        if (player1 != null)
         {
-            var level = LevelManager.Instance.levels[LevelManager.Instance.currentLevelIndex];
-            if (level != null)
-            {
-                if (player1 != null)
-                {
-                    player1.playerId = 1;
-                    player1.transform.position = level.player1SpawnPos;
-                }
-
-                if (player2 != null)
-                {
-                    player2.playerId = 2;
-                    player2.transform.position = level.player2SpawnPos;
-                }
-
-                if (rotationSystem != null && level.worldRoot != null)
-                {
-                    rotationSystem.worldRoot = level.worldRoot;
-                }
-            }
+            player1.playerId = 1;
         }
-        else
-        {
-            if (player1 != null)
-            {
-                player1.playerId = 1;
-            }
 
-            if (player2 != null)
-            {
-                player2.playerId = 2;
-            }
+        if (player2 != null)
+        {
+            player2.playerId = 2;
         }
     }
 
