@@ -20,9 +20,6 @@ using UnityEngine;
 
 public class PlayerController : MonoBehaviour
 {
-    [Header("玩家标识")]
-    public int playerId = 1; // 1 = 玩家A, 2 = 玩家B
-    
     [Header("移动参数")]
     public float moveSpeed = 5f;
     public float jumpForce = 10f;
@@ -53,17 +50,25 @@ public class PlayerController : MonoBehaviour
     
     public PlayerState currentState = PlayerState.Grounding;
     
+    private bool HasAnimatorParameter(string paramName)
+    {
+        if (animator == null) return false;
+        var parameters = animator.parameters;
+        for (int i = 0; i < parameters.Length; i++)
+        {
+            if (parameters[i].name == paramName) return true;
+        }
+        return false;
+    }
+
     void Start()
     {
         initializeRigidBody(); // 3项常规初始化，若没有则添加，DEMO中早已手动添加，通常没用
         initializeBoxCollider2D();
         initializeGroundLayer();
         initializeAnimator();
-        // initializePosition(); // 先将Player和mainCamera的位置摆正. （由PlayersManager统一管理）
+        initializePosition(); // 先将Player和mainCamera的位置摆正.
         initializeGroundCheck(); // 将脚底检测点的位置摆正。
-        
-        // 注册到旋转系统
-        RotationSystem.Instance?.RegisterPlayer(this);
     }
     
     void Update()
@@ -79,9 +84,6 @@ public class PlayerController : MonoBehaviour
         } 
         //--->ZHY:这里的实现逻辑有BUG:倘若用户跳起之后和墙壁接触，仍然会被判定成Ground状态！
 
-        // 更新状态（根据速度和地面检测）
-        UpdateState();
-
         ReadInput();
 
         // 移动
@@ -95,9 +97,6 @@ public class PlayerController : MonoBehaviour
         {
             Jump();
         }
-        
-        // 旋转输入检查
-        CheckRotationInput();
         
         //失败判断
         FailCheck();
@@ -184,45 +183,8 @@ public class PlayerController : MonoBehaviour
     private void ReadInput()
     {
         horizontalInput = 0f;
-        
-        if (playerId == 1)
-        {
-            // 玩家A：A/D移动
-            if (Input.GetKey(KeyCode.A)) horizontalInput = -1f;
-            if (Input.GetKey(KeyCode.D)) horizontalInput = 1f;
-        }
-        else
-        {
-            // 玩家B：J/L移动
-            if (Input.GetKey(KeyCode.J)) horizontalInput = -1f;
-            if (Input.GetKey(KeyCode.L)) horizontalInput = 1f;
-        }
-    }
-    
-    private void CheckRotationInput()
-    {
-        if (currentState != PlayerState.Grounding) return;
-        
-        float angleDelta = 0f;
-
-        if (playerId == 1)
-        {
-            // 玩家A：Q逆时针，E顺时针
-            if (Input.GetKeyDown(KeyCode.Q)) angleDelta = 90f;
-            else if (Input.GetKeyDown(KeyCode.E)) angleDelta = -90f;
-        }
-        else
-        {
-            // 玩家B：U逆时针，O顺时针
-            if (Input.GetKeyDown(KeyCode.U)) angleDelta = 90f;
-            else if (Input.GetKeyDown(KeyCode.O)) angleDelta = -90f;
-        }
-
-        if (angleDelta != 0f)
-        {
-            // 请求旋转
-            RotationSystem.Instance?.RequestRotation(angleDelta, this);
-        }
+        if (Input.GetKey(KeyCode.A)) horizontalInput = -1f; // A键向左
+        if (Input.GetKey(KeyCode.D)) horizontalInput = 1f;  // D键向右
     }
 
     private void updateGroundCheckPosition()
@@ -234,9 +196,9 @@ public class PlayerController : MonoBehaviour
     {
         float width = playerCollider.size.x; // 取碰撞箱的宽度
 
-        Vector2 centerPos = new Vector2(groundCheck.position.x, groundCheck.position.y - 0.2f); // 左中右设置三个检测点
-        Vector2 leftPoint = new Vector2(centerPos.x - width/3, centerPos.y);
-        Vector2 rightPoint = new Vector2(centerPos.x + width/3, centerPos.y); 
+        Vector2 centerPos = groundCheck.position; // 左中右设置三个检测点
+        Vector2 leftPoint = new Vector2(centerPos.x - width/3, centerPos.y - 0.2f);
+        Vector2 rightPoint = new Vector2(centerPos.x + width/3, centerPos.y - 0.2f); 
 
         // 检测三个点:使用扎针法（小圆形覆盖）
         bool leftHit = Physics2D.OverlapCircle(leftPoint, 0.05f, groundLayer);
@@ -264,51 +226,6 @@ public class PlayerController : MonoBehaviour
     {
         return currentState == PlayerState.Grounding;
     }
-    
-    /// <summary>
-    /// 更新状态（根据速度和地面检测）
-    /// </summary>
-    private void UpdateState()
-    {
-        float verticalVelocity = rb.velocity.y;
-        bool grounded = isPlayerGrounded();
-        
-        switch (currentState)
-        {
-            case PlayerState.Grounding:
-                // 在Grounding状态时，如果突然有向下的速度，进入Falling状态
-                if (!grounded && verticalVelocity < -0.1f)
-                {
-                    changeState(PlayerState.Falling);
-                }
-                break;
-                
-            case PlayerState.Jumping:
-                // 跳跃中，速度变为下落时转为Falling状态
-                if (verticalVelocity < -0.1f)
-                {
-                    changeState(PlayerState.Falling);
-                }
-                // 接触地面回到Grounding
-                else if (grounded)
-                {
-                    changeState(PlayerState.Grounding);
-                }
-                break;
-                
-            case PlayerState.Falling:
-                // 接触地面回到Grounding
-                if (grounded)
-                {
-                    changeState(PlayerState.Grounding);
-                }
-                break;
-                
-            case PlayerState.Rotating:
-                // 旋转状态由外部系统控制，不在这里处理
-                break;
-        }
-    }
 //--------以上为Update部分的状态转移与判断函数--------//
     private void UpdateAnimation()
     {
@@ -321,6 +238,48 @@ public class PlayerController : MonoBehaviour
         // 2. 更新朝向（用于左右动画切换）
         bool isRight = faceDirection > 0;
         animator.SetBool("isright", isRight);
+        
+        // 3. 确保状态标志正确（防止状态不同步）
+        // 根据currentState强制设置标志
+        /*switch (currentState)
+        {
+            case PlayerState.Grounding:
+                if (!animator.GetBool("isGrounded"))
+                {
+                    animator.SetBool("isGrounded", true);
+                    animator.SetBool("isJumping", false);
+                    animator.SetBool("isFalling", false);
+                }
+                break;
+                
+            case PlayerState.Jumping:
+                if (!animator.GetBool("isJumping"))
+                {
+                    animator.SetBool("isGrounded", false);
+                    animator.SetBool("isJumping", true);
+                    animator.SetBool("isFalling", false);
+                }
+                break;
+                
+            case PlayerState.Falling:
+                if (!animator.GetBool("isFalling"))
+                {
+                    animator.SetBool("isGrounded", false);
+                    animator.SetBool("isJumping", false);
+                    animator.SetBool("isFalling", true);
+                }
+                break;
+                
+            case PlayerState.Rotating:
+                animator.SetBool("isRotating", true);
+                break;
+        }*/
+        
+        // 4. 清理不需要的动画标志
+        if (currentState != PlayerState.Rotating && HasAnimatorParameter("isRotating") && animator.GetBool("isRotating"))
+        {
+            animator.SetBool("isRotating", false);
+        }
     }
     private void UpdateAnimationOnStateChange()
     {
@@ -331,27 +290,27 @@ public class PlayerController : MonoBehaviour
             case PlayerState.Grounding:
                 // 着陆：停止跳跃/下落动画
                 animator.SetBool("isGrounded", true);
-                //animator.SetBool("isJumping", false);
-                //animator.SetBool("isFalling", false);
+                if (HasAnimatorParameter("isJumping")) animator.SetBool("isJumping", false);
+                if (HasAnimatorParameter("isFalling")) animator.SetBool("isFalling", false);
                 break;
                 
             case PlayerState.Jumping:
                 // 跳跃：播放跳跃动画
                 animator.SetBool("isGrounded", false);
-                //animator.SetBool("isJumping", true);
-                //animator.SetBool("isFalling", false);
+                if (HasAnimatorParameter("isJumping")) animator.SetBool("isJumping", true);
+                if (HasAnimatorParameter("isFalling")) animator.SetBool("isFalling", false);
                 break;
                 
             case PlayerState.Falling:
                 // 下落：播放下落动画
                 animator.SetBool("isGrounded", false);
-                //animator.SetBool("isJumping", false);
-                //animator.SetBool("isFalling", true);
+                if (HasAnimatorParameter("isJumping")) animator.SetBool("isJumping", false);
+                if (HasAnimatorParameter("isFalling")) animator.SetBool("isFalling", true);
                 break;
                 
             case PlayerState.Rotating:
                 // 旋转：播放旋转动画
-                //animator.SetBool("isRotating", true);
+                if (HasAnimatorParameter("isRotating")) animator.SetBool("isRotating", true);
                 break;
         }
     }
@@ -361,46 +320,14 @@ public class PlayerController : MonoBehaviour
     private bool IsTouchingWall(int direction) // direction: -1左, 1右
     {
         Bounds bounds = playerCollider.bounds;
+        Vector2 origin = direction == -1 ? 
+            new Vector2(bounds.min.x, bounds.center.y) : 
+            new Vector2(bounds.max.x, bounds.center.y);
         
-        // 检测范围：从角色底部到顶部（留一点边距避免检测地面）
-        float startY = bounds.min.y + 0.1f;
-        float endY = bounds.max.y - 0.1f;
-        
-        // 检测点数量（越多越精确，但性能稍差）
-        int checkPoints = 5;  // 从上到下5个检测点
-        
-        // 偏移量，确保射线从角色外部开始
-        float skinWidth = 0.02f;
-        
-        for (int i = 0; i < checkPoints; i++)
-        {
-            // 计算当前检测点的Y坐标
-            float t = i / (float)(checkPoints - 1);
-            float y = Mathf.Lerp(startY, endY, t);
-            
-            // 射线起点（在角色边缘外侧）
-            Vector2 origin = direction == -1 ? 
-                new Vector2(bounds.min.x - skinWidth, y) : 
-                new Vector2(bounds.max.x + skinWidth, y);
-            
-            // 发射射线
-            RaycastHit2D hit = Physics2D.Raycast(origin, 
-                direction == -1 ? Vector2.left : Vector2.right, 
-                0.15f, 
-                groundLayer);
-            
-            // 可视化调试（不同颜色表示不同检测点）
-            Color rayColor = hit.collider != null ? Color.red : Color.green;
-            Debug.DrawRay(origin, (direction == -1 ? Vector2.left : Vector2.right) * 0.15f, rayColor);
-            
-            // 只要有一个点检测到墙壁，就返回true
-            if (hit.collider != null)
-            {
-                return true;
-            }
-        }
-        
-        return false;
+        RaycastHit2D hit = Physics2D.Raycast(origin, direction == -1 ? Vector2.left : Vector2.right, 0.15f, groundLayer);
+//        Debug.Log($"{hit.collider != null}");
+        Debug.DrawRay(origin, (direction == -1 ? Vector2.left : Vector2.right) * 0.15f, hit.collider != null ? Color.red : Color.green);
+        return hit.collider != null;
     }
 
     private void Move()
@@ -435,7 +362,7 @@ public class PlayerController : MonoBehaviour
             faceDirection = move;
             
             // 翻转角色方向
-            Vector3 scale = transform.localScale;
+          Vector3 scale = transform.localScale;
             scale.x = Mathf.Abs(scale.x) * Mathf.Sign(faceDirection);
             transform.localScale = scale;
         }
@@ -444,65 +371,12 @@ public class PlayerController : MonoBehaviour
     // 跳跃
     private void Jump()
     {
-        bool jumpPressed = false;
-
-        if (playerId == 1)
+        if (Input.GetKeyDown(KeyCode.Space) | Input.GetKeyDown(KeyCode.W))
         {
-            jumpPressed = Input.GetKeyDown(KeyCode.Space) || Input.GetKeyDown(KeyCode.W);
-        }
-        else
-        {
-            jumpPressed = Input.GetKeyDown(KeyCode.I) || Input.GetKeyDown(KeyCode.Keypad0);
-        }
-
-        if (jumpPressed)
-        {
-            rb.AddForce(Vector2.up * jumpForce / 1.5f, ForceMode2D.Impulse);
-            changeState(PlayerState.Jumping);
+            rb.AddForce(Vector2.up * jumpForce / 2f, ForceMode2D.Impulse);
+            currentState = PlayerState.Jumping;
             jumpTimer = Time.time;
         }
-    }
-    
-    /// <summary>
-    /// 进入旋转状态（由RotationSystem调用）
-    /// </summary>
-    public void EnterRotationState()
-    {
-        currentState = PlayerState.Rotating;
-        rb.velocity = Vector2.zero;
-        rb.gravityScale = 0;
-    }
-    
-    /// <summary>
-    /// 退出旋转状态（由RotationSystem调用）
-    /// </summary>
-    public void ExitRotationState()
-    {
-        rb.gravityScale = 1;
-        
-        // 根据当前情况决定退出旋转后的状态
-        if (isPlayerGrounded())
-        {
-            changeState(PlayerState.Grounding);
-        }
-        else
-        {
-            // 如果在空中，根据速度判断是跳跃还是下落
-            float verticalVelocity = rb.velocity.y;
-            if (verticalVelocity > 0)
-            {
-                changeState(PlayerState.Jumping);
-            }
-            else
-            {
-                changeState(PlayerState.Falling);
-            }
-        }
-    }
-    
-    public Bounds GetColliderBounds()
-    {
-        return playerCollider.bounds;
     }
 
     private void JumpStateUntilLand() //修改人物动画为跳跃状态
