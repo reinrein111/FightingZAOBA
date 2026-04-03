@@ -36,7 +36,7 @@ public class Bullet : MonoBehaviour
 
         // 抵扣失败或没护盾：执行原有的死亡
         SpikeTrigger st = Object.FindAnyObjectByType<SpikeTrigger>();
-        if (st != null) st.ExecuteDeath();
+        if (st != null) st.ExecuteDeath(collision.GetComponent<PlayerController>());
         
         Destroy(gameObject);
     }

@@ -3,153 +3,140 @@ using UnityEngine;
 public class TeacherController : MonoBehaviour
 {
     [Header("引用")]
-    public GameObject bulletPrefab;      // 关联子弹的 Prefab
-    public Transform firePoint;         // 关联发射点 Fire_Point
-    public SpriteRenderer visual_sprite; // 用于获取图片边界和镜像翻转
+    public GameObject bulletPrefab;
+    public Transform firePoint;
+    public SpriteRenderer visual_sprite;
 
     [Header("射程与频率")]
-    public float attackRange = 5f;      // 触发攻击（状态2）的距离 r
-    public float escapeRange = 8f;      // 停止观察并坐下（状态0）的距离 R
-    public float fireRate = 1.5f;       // 发射间隔
+    public float attackRange = 5f;  // 扔粉笔的射程
+    public float escapeRange = 8f;  // 观察/坐下的范围
+    // 注意：有了动画事件，fireRate 将由动画播放速度和间隔决定
 
-    [Header("动画状态输出 (队友使用)")]
-    [Tooltip("0: 坐着批改, 1: 站立观察, 2: 扔粉笔攻击")]
-    public int teacherState = 0; 
+    [Header("动画状态输出")]
+    public int teacherState = 0;
 
-    private Transform player;
-    private float nextFireTime;
-    private bool isTracking = false;    // 是否处于攻击锁定状态
+    private Transform player1;
+    private Transform player2;
+    private Transform nearestPlayer;
+    private bool isTracking = false;
 
-    private Animator anim; // 【新增】控制动画状态机
-    private int lastState = -1; // 【新增】用于记录上一个状态，防止动画重播
+    private Animator anim;
+    private int lastState = -1;
 
     void Start()
     {
-        // 自动寻找场景中带 Player 标签的玩家
-        GameObject p = GameObject.FindGameObjectWithTag("Player");
-        if (p != null) player = p.transform;
+        GameObject p1 = GameObject.Find("Player1");
+        if (p1 != null) player1 = p1.transform;
+        GameObject p2 = GameObject.Find("Player2");
+        if (p2 != null) player2 = p2.transform;
 
-        // 安全检查：如果 Inspector 没拖，尝试自动获取
         if (visual_sprite == null)
             visual_sprite = GetComponentInChildren<SpriteRenderer>();
 
-        // 【新增】获取 Animator 组件
         if (visual_sprite != null)
             anim = visual_sprite.GetComponent<Animator>();
     }
 
     void Update()
     {
-        if (player == null || visual_sprite == null) return;
+        if (player1 == null && player2 == null) return;
 
-        // --- 1. 近身死亡判定 (优先级最高) ---
+        FindNearestPlayer();
+        if (nearestPlayer == null || visual_sprite == null) return;
+
+        // --- 1. 近身即死判定 ---
         Bounds teacherBounds = visual_sprite.bounds;
-        Vector3 playerCheckPos = new Vector3(player.position.x, player.position.y, teacherBounds.center.z);
+        Vector3 playerPos = new Vector3(nearestPlayer.position.x, nearestPlayer.position.y, teacherBounds.center.z);
 
-        if (teacherBounds.Contains(playerCheckPos))
+        if (teacherBounds.Contains(playerPos))
         {
-            ExecuteDeathLogic();
+            ExecuteDeathLogic(nearestPlayer);
             return; 
         }
 
         // --- 2. 距离计算与状态切换 ---
-        float distance = Vector2.Distance(transform.position, player.position);
+        float distance = Vector2.Distance(transform.position, nearestPlayer.position);
 
         if (distance > escapeRange)
         {
-            // 状态 0：玩家跑远了，老师坐下批改作业
             teacherState = 0;
             isTracking = false;
         }
         else if (distance <= escapeRange && distance > attackRange)
         {
-            // 状态 1：玩家进入警戒区，老师站起来盯着看
             teacherState = 1;
             isTracking = false;
-            LookAtPlayer(); // 盯着玩家看
+            LookAtPlayer();
         }
         else if (distance <= attackRange)
         {
-            // 状态 2：玩家进入攻击区，老师开始扔粉笔
             teacherState = 2;
             isTracking = true;
             LookAtPlayer();
         }
 
-        // 【修改】只有当状态真正发生变化时，才更新 Animator 参数
-        // 这样可以防止每一帧都重新启动当前动画，导致动画播不完
-        if (anim != null && teacherState != lastState)
+        // --- 3. 动画处理 ---
+        if (anim != null)
         {
-            anim.SetInteger("Teacher State", teacherState);
-            lastState = teacherState;
-        }
-
-        // --- 3. 执行攻击行为 ---
-        if (isTracking && teacherState == 2)
-        {
-            if (Time.time >= nextFireTime)
+            // 更新基础状态 (0:坐, 1:站)
+            if (teacherState != lastState)
             {
-                ThrowChalk();
-                nextFireTime = Time.time + fireRate;
+                anim.SetInteger("Teacher State", teacherState);
+                lastState = teacherState;
+            }
+
+            // 如果处于攻击范围，且当前处于状态2，通过 Trigger 触发攻击动画
+            // 动画播放时，我们在动画中设置的 Event 会自动调用 ThrowChalk
+            if (isTracking && teacherState == 2)
+            {
+                // 这里可以加一个简单的计时器，或者让动画播完自动回切
+                // 如果你的动画是循环的，建议使用 Trigger
+                anim.SetTrigger("Throw"); 
             }
         }
     }
 
+    private void FindNearestPlayer()
+    {
+        float dist1 = (player1 != null) ? Vector2.Distance(transform.position, player1.position) : float.MaxValue;
+        float dist2 = (player2 != null) ? Vector2.Distance(transform.position, player2.position) : float.MaxValue;
+        nearestPlayer = (dist1 < dist2) ? player1 : player2;
+    }
+
     void LookAtPlayer()
     {
-        if (visual_sprite == null || player == null) return;
-        // 根据玩家在左还是在右进行镜像翻转
-        visual_sprite.flipX = (player.position.x > transform.position.x);
+        if (visual_sprite == null || nearestPlayer == null) return;
+        visual_sprite.flipX = (nearestPlayer.position.x > transform.position.x);
     }
 
-    void ThrowChalk()
+    // --- 核心变化：这个函数现在由 Animation Event 调用 ---
+    // 必须保持为 public 才能被动画事件检测到
+    public void ThrowChalk()
     {
-        if (bulletPrefab == null || firePoint == null) return;
+        if (bulletPrefab == null || firePoint == null || nearestPlayer == null) return;
 
-        // 生成子弹实例
+        // 实例化粉笔
         GameObject b = Instantiate(bulletPrefab, firePoint.position, Quaternion.identity);
         Bullet script = b.GetComponent<Bullet>();
-        
+
         if (script != null)
         {
-            Vector2 dir = (Vector2)player.position - (Vector2)firePoint.position;
+            Vector2 dir = (Vector2)nearestPlayer.position - (Vector2)firePoint.position;
             script.Launch(dir);
         }
+        
+        Debug.Log("动画触发了 ThrowChalk！粉笔已发射。");
     }
 
-    private void ExecuteDeathLogic()
+    private void ExecuteDeathLogic(Transform targetPlayer)
     {
-        PlayerShield shield = player.GetComponent<PlayerShield>();
-
-        if (shield != null && shield.TryUseShield())
-        {
-            Debug.Log("老师抓到了玩家，但被包子护盾挡住了！");
-            return; 
-        }
+        PlayerShield shield = targetPlayer.GetComponent<PlayerShield>();
+        if (shield != null && shield.TryUseShield()) return;
 
         SpikeTrigger st = Object.FindAnyObjectByType<SpikeTrigger>();
         if (st != null)
         {
-            st.ExecuteDeath();
-        }
-    }
-
-    // 可视化调试：在 Scene 窗口显示判定区域
-    private void OnDrawGizmos()
-    {
-        if (visual_sprite != null)
-        {
-            // 白色方框：近身即死区域
-            Gizmos.color = Color.white;
-            Gizmos.DrawWireCube(visual_sprite.bounds.center, visual_sprite.bounds.size);
-
-            // 红色圆圈：攻击范围 (r)
-            Gizmos.color = Color.red;
-            Gizmos.DrawWireSphere(transform.position, attackRange);
-
-            // 黄色圆圈：警戒/逃离范围 (R)
-            Gizmos.color = Color.yellow;
-            Gizmos.DrawWireSphere(transform.position, escapeRange);
+            st.ExecuteDeath(targetPlayer.GetComponent<PlayerController>());
         }
     }
 }

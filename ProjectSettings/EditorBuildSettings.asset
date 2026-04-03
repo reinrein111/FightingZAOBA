@@ -6,6 +6,32 @@ EditorBuildSettings:
   serializedVersion: 2
   m_Scenes:
   - enabled: 1
+    path: Assets/Scenes/MainMenu.scene
+    guid: 3ce742e2f9481674fb9eb3d29abc3fa7
+  - enabled: 1
+    path: Assets/Scenes/LoadingScene.scene
+    guid: 51eb95a06bf68b344a363a5562393637
+  - enabled: 1
+    path: Assets/Scenes/ZAOBA_Map_0.scene
+    guid: 636d228024626f344a0da1f2b1212599
+  - enabled: 1
+    path: Assets/Scenes/ZAOBA_Map_1.scene
+    guid: fb6dcba16806f6c4cbd5c4d8a632a5ff
+  - enabled: 1
+    path: Assets/Scenes/ZAOBA_Map_2.scene
+    guid: 2956b4d873256bb43a29051ffd7c60fb
+  - enabled: 1
     path: Assets/Scenes/SampleScene.scene
     guid: 2cda990e2423bbf4892e6590ba056729
+  m_BuildProfiles: []
   m_configObjects: {}
+  m_SlimFeaturesWeixinMiniGame:
+    ACLDecompression: 0
+    AllocateOverhead: 1
+    DecompressASTC: 0
+    DecompressDXT: 0
+    DecompressETC: 1
+    FreeTypeSfntPng: 1
+    LightProbe: 2
+    RootMotion: 0
+    UseStringInternPool: 2
