@@ -1,9 +1,13 @@
 fileFormatVersion: 2
+<<<<<<< Updated upstream
 <<<<<<<< Updated upstream:Assets/Scripts/PlayerCameraController.cs.meta
 guid: WixL5Cj+Ui7YEUQWeAJyA7eD3dKS0rLArRKdnAR52rGeWwKKB07hFFI=
 ========
 guid: CC5M5yv8VS/OWMftTvI5GutIUVqyb2hrAwM3zjiE7d6mjbz5dBzeruU=
 >>>>>>>> Stashed changes:Assets/Scripts/LevelManager.cs.meta
+=======
+guid: WixL5Cj+Ui7YEUQWeAJyA7eD3dKS0rLArRKdnAR52rGeWwKKB07hFFI=
+>>>>>>> Stashed changes
 MonoImporter:
   externalObjects: {}
   serializedVersion: 2

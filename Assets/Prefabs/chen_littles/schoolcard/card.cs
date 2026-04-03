@@ -10,11 +10,17 @@ public class CampusCard : MonoBehaviour
     private Transform player1;
     private Transform player2;
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
 =======
+=======
+>>>>>>> Stashed changes
     private Vector3 initialLocalPosition;
     private Quaternion initialLocalRotation;
     private Vector3 initialLocalScale;
     private bool wasPickedUp = false;
+<<<<<<< Updated upstream
+>>>>>>> Stashed changes
+=======
 >>>>>>> Stashed changes
 
     void Start()
@@ -24,17 +30,28 @@ public class CampusCard : MonoBehaviour
         GameObject p2 = GameObject.Find("Player2");
         if (p2 != null) player2 = p2.transform;
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
 =======
+=======
+>>>>>>> Stashed changes
 
         initialLocalPosition = transform.localPosition;
         initialLocalRotation = transform.localRotation;
         initialLocalScale = transform.localScale;
+<<<<<<< Updated upstream
+>>>>>>> Stashed changes
+=======
 >>>>>>> Stashed changes
     }
 
     void Update()
     {
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
+=======
+        if (wasPickedUp) return;
+        if (!gameObject.activeSelf) return;
+>>>>>>> Stashed changes
 =======
         if (wasPickedUp) return;
         if (!gameObject.activeSelf) return;
@@ -70,7 +87,12 @@ public class CampusCard : MonoBehaviour
                     Debug.Log($"<color=yellow>{nearestPlayer.name} 拾取了 Boy 卡！</color>");
                 }
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
                 Destroy(gameObject);
+=======
+                wasPickedUp = true;
+                gameObject.SetActive(false);
+>>>>>>> Stashed changes
 =======
                 wasPickedUp = true;
                 gameObject.SetActive(false);

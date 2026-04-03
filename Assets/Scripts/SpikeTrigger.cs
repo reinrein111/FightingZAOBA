@@ -32,10 +32,16 @@ public class SpikeTrigger : MonoBehaviour
         if (redOverlay != null) redOverlay.alpha = 0f;
 
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
         // 自动获取玩家
         GameObject playerObj1 = GameObject.Find("Player1");
         GameObject playerObj2 = GameObject.Find("Player2");
         
+=======
+        GameObject playerObj1 = GameObject.Find("Player1");
+        GameObject playerObj2 = GameObject.Find("Player2");
+
+>>>>>>> Stashed changes
 =======
         GameObject playerObj1 = GameObject.Find("Player1");
         GameObject playerObj2 = GameObject.Find("Player2");

@@ -1,5 +1,9 @@
 fileFormatVersion: 2
+<<<<<<<< Updated upstream:Assets/Scripts/SharedCameraController.cs.meta
 guid: CHkdsiitU3Lt2yaHblQuDalkARwUsidvIsbsd1LRaAcjmc/RYTXJk/Y=
+========
+guid: CC5M5yv8VS/OWMftTvI5GutIUVqyb2hrAwM3zjiE7d6mjbz5dBzeruU=
+>>>>>>>> Stashed changes:Assets/Scripts/LevelManager.cs.meta
 MonoImporter:
   externalObjects: {}
   serializedVersion: 2

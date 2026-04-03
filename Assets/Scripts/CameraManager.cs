@@ -104,7 +104,11 @@ public class CameraManager : MonoBehaviour
     /// 设置相机Viewport（分屏显示）
     /// </summary>
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
     private void SetupViewports()
+=======
+    public void SetupViewports()
+>>>>>>> Stashed changes
 =======
     public void SetupViewports()
 >>>>>>> Stashed changes

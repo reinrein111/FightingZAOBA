@@ -1,9 +1,13 @@
 fileFormatVersion: 2
+<<<<<<< Updated upstream
 <<<<<<<< Updated upstream:Assets/Scripts/RotationSystem.cs.meta
 guid: BnIW53+lAHsXO77HJwtUcvfZdAYmBjf7FiExgCOnylhoeX7CqXk4WUM=
 ========
 guid: f79c8de70823b694e8961d9a040faa37
 >>>>>>>> Stashed changes:Assets/Scripts/MainMenuController.cs.meta
+=======
+guid: BnIW53+lAHsXO77HJwtUcvfZdAYmBjf7FiExgCOnylhoeX7CqXk4WUM=
+>>>>>>> Stashed changes
 MonoImporter:
   externalObjects: {}
   serializedVersion: 2

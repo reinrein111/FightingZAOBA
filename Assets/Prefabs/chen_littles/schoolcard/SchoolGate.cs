@@ -9,9 +9,12 @@ public class SchoolGate : MonoBehaviour
     public float openDistance = 1.5f;
 
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
     [Header("相机过渡设置")]
     public float transitionDuration = 1f;
 
+=======
+>>>>>>> Stashed changes
 =======
 >>>>>>> Stashed changes
     private Transform player1;
@@ -21,9 +24,12 @@ public class SchoolGate : MonoBehaviour
     public Camera girlCamera;
     public Camera boyCamera;
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
 
     private float originalBoySize;
     private Rect originalBoyRect;
+=======
+>>>>>>> Stashed changes
 =======
 >>>>>>> Stashed changes
 
@@ -36,12 +42,16 @@ public class SchoolGate : MonoBehaviour
 
         SetupCameras();
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
+=======
+>>>>>>> Stashed changes
     }
 
     private void SetupCameras()
     {
         Camera[] cameras = FindObjectsOfType<Camera>();
         foreach (Camera cam in cameras)
+<<<<<<< Updated upstream
         {
             PlayerCameraController pcc = cam.GetComponent<PlayerCameraController>();
             if (pcc != null)
@@ -103,15 +113,25 @@ public class SchoolGate : MonoBehaviour
             PlayerCameraController pcc = cam.GetComponent<PlayerCameraController>();
             if (pcc != null)
             {
+=======
+        {
+            PlayerCameraController pcc = cam.GetComponent<PlayerCameraController>();
+            if (pcc != null)
+            {
+>>>>>>> Stashed changes
                 if (pcc.targetPlayerId == 1)
                     girlCamera = cam;
                 else if (pcc.targetPlayerId == 2)
                     boyCamera = cam;
+<<<<<<< Updated upstream
+>>>>>>> Stashed changes
+=======
 >>>>>>> Stashed changes
             }
         }
     }
 
+<<<<<<< Updated upstream
 <<<<<<< Updated upstream
     private IEnumerator SmoothCameraTransition()
     {
@@ -188,6 +208,10 @@ public class SchoolGate : MonoBehaviour
 =======
     void Update()
     {
+=======
+    void Update()
+    {
+>>>>>>> Stashed changes
         if (hasTriggered) return;
 
         if (gateType == GateType.Girl)
@@ -227,6 +251,9 @@ public class SchoolGate : MonoBehaviour
                 Debug.Log($"{cardName}门锁着，{targetPlayer.name}需要{cardName}才能进入。");
             }
         }
+<<<<<<< Updated upstream
+>>>>>>> Stashed changes
+=======
 >>>>>>> Stashed changes
     }
 

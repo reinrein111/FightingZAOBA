@@ -1,9 +1,13 @@
 fileFormatVersion: 2
+<<<<<<< Updated upstream
 <<<<<<<< Updated upstream:Assets/Prefabs/chen_littles/teacher/Tea_prefabs/Teacher_boss 1.prefab.meta
 guid: 7607b2a7579e19546b96f76523ffc3aa
 ========
 guid: 30b6ba646f2db414cae3f386e4da0b46
 >>>>>>>> Stashed changes:Assets/Prefabs/Canvas.prefab.meta
+=======
+guid: 7607b2a7579e19546b96f76523ffc3aa
+>>>>>>> Stashed changes
 PrefabImporter:
   externalObjects: {}
   userData: 
