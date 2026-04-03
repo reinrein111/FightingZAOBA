@@ -1,0 +1,44 @@
+# ============== Unity 核心自动生成目录 ==============
+# 这些是绝对不能提交的缓存和编译产物
+[Ll]ibrary/
+[Tt]emp/
+[Oo]bj/
+[Bb]uild/
+[Bb]uilds/
+[Ll]ogs/
+[Uu]serSettings/
+[Aa]ssetStore/
+[Cc]omments/
+
+# ============== 编辑器与IDE配置 ==============
+# VS Code 本地配置（记录你的个人调试环境）
+.vscode/
+# Visual Studio 本地缓存
+.vs/
+*.suo
+*.user
+*.userprefs
+# Rider 等其他IDE
+.idea/
+*.sln
+*.csproj
+*.unityproj
+
+# ============== 系统与垃圾文件 ==============
+.DS_Store
+Thumbs.db
+*.tmp
+*.log
+
+# ============== Unity 特定杂项 ==============
+# 视觉工作室自动生成的缓存文件
+*.pidb
+*.svd
+*.pdb
+*.mdb
+*.opendb
+*.VC.db
+# 构建输出
+*.apk
+*.aab
+*.ipa
