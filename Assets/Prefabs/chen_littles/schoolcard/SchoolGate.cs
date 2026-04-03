@@ -1,51 +1,92 @@
 using UnityEngine;
-using UnityEngine.SceneManagement; // 用于切换关卡
+using System.Collections;
 
 public class SchoolGate : MonoBehaviour
 {
-    public float openDistance = 1.5f; // 感应距离
-    public string nextSceneName = "WinScene"; // 胜利后的场景名
+    public enum GateType { Girl, Boy }
+    public GateType gateType = GateType.Girl;
 
-    private Transform player;
+    public float openDistance = 1.5f;
+
+    private Transform player1;
+    private Transform player2;
+    private bool hasTriggered = false;
+
+    public Camera girlCamera;
+    public Camera boyCamera;
 
     void Start()
     {
-        GameObject p = GameObject.FindGameObjectWithTag("Player");
-        if (p != null) player = p.transform;
+        GameObject p1 = GameObject.Find("Player1");
+        if (p1 != null) player1 = p1.transform;
+        GameObject p2 = GameObject.Find("Player2");
+        if (p2 != null) player2 = p2.transform;
+
+        SetupCameras();
     }
 
-    void Update()
+    private void SetupCameras()
     {
-        if (player == null) return;
-
-        float dist = Vector2.Distance(transform.position, player.position);
-        if (dist < openDistance)
+        Camera[] cameras = FindObjectsOfType<Camera>();
+        foreach (Camera cam in cameras)
         {
-            PlayerInventory inv = player.GetComponent<PlayerInventory>();
-            
-            if (inv != null && inv.hasCampusCard)
+            PlayerCameraController pcc = cam.GetComponent<PlayerCameraController>();
+            if (pcc != null)
             {
-                Debug.Log("<color=green>校园卡验证通过！门已打开。</color>");
-                WinGame();
-            }
-            else
-            {
-                // 如果没卡，可以这里加个提示，比如“请先寻找校园卡”
-                Debug.Log("门锁着，你需要校园卡才能进入。");
+                if (pcc.targetPlayerId == 1)
+                    girlCamera = cam;
+                else if (pcc.targetPlayerId == 2)
+                    boyCamera = cam;
             }
         }
     }
 
-    void WinGame()
+    void Update()
     {
-        // 这里执行胜利逻辑，比如加载下一关或者弹出结算界面
-        // SceneManager.LoadScene(nextSceneName); 
-        Debug.Log("恭喜通关！");
+        if (hasTriggered) return;
+
+        if (gateType == GateType.Girl)
+        {
+            CheckGateAccess(player1, inv => inv.hasCard_Girl, "女孩卡片", 1);
+        }
+        else
+        {
+            CheckGateAccess(player2, inv => inv.hasCard_Boy, "男孩卡片", 2);
+        }
+    }
+
+    private void CheckGateAccess(Transform targetPlayer, System.Func<PlayerInventory, bool> cardCheck, string cardName, int playerId)
+    {
+        if (targetPlayer == null) return;
+
+        float dist = Vector2.Distance(transform.position, targetPlayer.position);
+        if (dist < openDistance)
+        {
+            PlayerInventory inv = targetPlayer.GetComponent<PlayerInventory>();
+
+            if (inv != null && cardCheck(inv))
+            {
+                Debug.Log($"<color=green>{cardName}验证通过！{targetPlayer.name}已通过{gameObject.name}。</color>");
+                hasTriggered = true;
+
+                targetPlayer.gameObject.SetActive(false);
+                Debug.Log($"<color=orange>{targetPlayer.name}已消失，相机停留在当前位置</color>");
+
+                if (LevelManager.Instance != null)
+                {
+                    LevelManager.Instance.PlayerPassedGate(playerId);
+                }
+            }
+            else
+            {
+                Debug.Log($"{cardName}门锁着，{targetPlayer.name}需要{cardName}才能进入。");
+            }
+        }
     }
 
     private void OnDrawGizmos()
     {
-        Gizmos.color = Color.green;
+        Gizmos.color = gateType == GateType.Girl ? Color.magenta : Color.cyan;
         Gizmos.DrawWireCube(transform.position, new Vector3(openDistance, openDistance, 0));
     }
 }
