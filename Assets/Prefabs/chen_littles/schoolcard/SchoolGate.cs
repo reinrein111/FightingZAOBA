@@ -1,118 +1,55 @@
 using UnityEngine;
-using System.Collections;
 
 public class SchoolGate : MonoBehaviour
 {
     public enum GateType { Girl, Boy }
-    public GateType gateType = GateType.Girl;
+    public GateType gateType = GateType.Girl; // 女孩门选 Girl
 
     public float openDistance = 1.5f;
-
     private Transform player1;
     private Transform player2;
-    private bool isPlayerAtGate = false;
-
-    public Camera girlCamera;
-    public Camera boyCamera;
+    private bool hasTriggered = false;
 
     void Start()
     {
-        GameObject p1 = GameObject.Find("Player1");
-        if (p1 != null) player1 = p1.transform;
-        GameObject p2 = GameObject.Find("Player2");
-        if (p2 != null) player2 = p2.transform;
-
-        SetupCameras();
+        player1 = GameObject.Find("Player1")?.transform;
+        player2 = GameObject.Find("Player2")?.transform;
     }
-
-    private void SetupCameras()
+    // 在 SchoolGate.cs 脚本中添加
+public void HidePassedPlayer(int playerId)
+{
+    // 根据 ID 找到对应的玩家物体并隐藏
+    GameObject player = GameObject.Find("Player" + playerId);
+    if (player != null)
     {
-        Camera[] cameras = FindObjectsOfType<Camera>();
-        foreach (Camera cam in cameras)
-        {
-            PlayerCameraController pcc = cam.GetComponent<PlayerCameraController>();
-            if (pcc != null)
-            {
-                if (pcc.targetPlayerId == 1)
-                    girlCamera = cam;
-                else if (pcc.targetPlayerId == 2)
-                    boyCamera = cam;
-            }
-        }
+        player.SetActive(false);
+        Debug.Log($"<color=orange>校门已手动隐藏 Player{playerId}</color>");
     }
-
+}
     void Update()
     {
-        if (gateType == GateType.Girl)
+        if (hasTriggered) return;
+
+        // 根据门类型确定要检测哪个玩家
+        Transform target = (gateType == GateType.Girl) ? player1 : player2;
+        if (target == null) return;
+
+        float dist = Vector2.Distance(transform.position, target.position);
+        if (dist < openDistance)
         {
-            CheckGateAccess(player1, inv => inv.hasCard_Girl, "女孩卡片", 1);
-        }
-        else
-        {
-            CheckGateAccess(player2, inv => inv.hasCard_Boy, "男孩卡片", 2);
-        }
-    }
-
-    private void CheckGateAccess(Transform targetPlayer, System.Func<PlayerInventory, bool> cardCheck, string cardName, int playerId)
-    {
-        if (targetPlayer == null) return;
-
-        float dist = Vector2.Distance(transform.position, targetPlayer.position);
-        bool isAtGate = dist < openDistance;
-
-        if (isAtGate)
-        {
-            PlayerInventory inv = targetPlayer.GetComponent<PlayerInventory>();
-
-            if (inv != null && cardCheck(inv))
+            PlayerInventory inv = target.GetComponent<PlayerInventory>();
+            
+            // 校验：有卡，且身份对应（女孩进女孩门）
+            if (inv != null && inv.hasCard)
             {
-                if (!isPlayerAtGate)
-                {
-                    Debug.Log($"<color=green>{cardName}验证通过！{targetPlayer.name}已到达{gameObject.name}。</color>");
-                }
-                isPlayerAtGate = true;
-
+                // 因为目标玩家已经是根据门类型选定的，所以这里直接判断 hasCard
+                Debug.Log($"{target.name} 验证通过，进入校园！");
+                hasTriggered = true;
+                target.gameObject.SetActive(false);
+                
                 if (LevelManager.Instance != null)
-                {
-                    LevelManager.Instance.UpdatePlayerAtGate(playerId, true);
-                }
-            }
-            else
-            {
-                isPlayerAtGate = false;
-                if (LevelManager.Instance != null)
-                {
-                    LevelManager.Instance.UpdatePlayerAtGate(playerId, false);
-                }
+                    LevelManager.Instance.PlayerPassedGate((gateType == GateType.Girl) ? 1 : 2);
             }
         }
-        else
-        {
-            if (isPlayerAtGate)
-            {
-                Debug.Log($"<color=orange>{targetPlayer.name}离开了{gameObject.name}</color>");
-            }
-            isPlayerAtGate = false;
-            if (LevelManager.Instance != null)
-            {
-                LevelManager.Instance.UpdatePlayerAtGate(playerId, false);
-            }
-        }
-    }
-
-    public void HidePassedPlayer(int playerId)
-    {
-        Transform targetPlayer = (playerId == 1) ? player1 : player2;
-        if (targetPlayer != null)
-        {
-            targetPlayer.gameObject.SetActive(false);
-            Debug.Log($"<color=orange>{targetPlayer.name}已消失</color>");
-        }
-    }
-
-    private void OnDrawGizmos()
-    {
-        Gizmos.color = gateType == GateType.Girl ? Color.magenta : Color.cyan;
-        Gizmos.DrawWireCube(transform.position, new Vector3(openDistance, openDistance, 0));
     }
 }

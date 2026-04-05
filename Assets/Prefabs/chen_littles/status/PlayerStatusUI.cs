@@ -4,31 +4,24 @@ using UnityEngine.UI;
 public class PlayerStatusUI : MonoBehaviour
 {
     [Header("UI 引用")]
-    public Image[] heartIcons;    
-    public Image cardIcon;        
+    public Image[] heartIcons; // 拖入 6 个心形
+    public Image cardIcon;    // 拖入校园卡图片
 
-    [Header("当前显示数值 (只读)")]
-    public int currentHealth = 1; 
-
-    // 重点：改成 Awake，确保它比其他脚本更早准备好
+    // 强制初始化
     void Awake()
     {
-        if (cardIcon != null) cardIcon.enabled = false;
-        UpdateUI(); 
+        // 1. 隐藏校园卡物体
+        if (cardIcon != null) 
+        {
+            cardIcon.gameObject.SetActive(false); 
+        }
+
+        // 2. 初始只显示 1 个爱心
+        SetHeartDisplay(1); 
     }
 
+    // 核心显示逻辑
     public void SetHeartDisplay(int count)
-    {
-        currentHealth = count;
-        UpdateUI();
-    }
-
-    public void ShowCard()
-    {
-        if (cardIcon != null) cardIcon.enabled = true;
-    }
-
-    private void UpdateUI()
     {
         if (heartIcons == null || heartIcons.Length == 0) return;
 
@@ -36,12 +29,23 @@ public class PlayerStatusUI : MonoBehaviour
         {
             if (heartIcons[i] != null)
             {
-                // 核心逻辑：只有索引小于血量的才显示
-                heartIcons[i].enabled = (i < currentHealth);
-                
-                // 调试日志：如果运行了，控制台会打印
-                // Debug.Log($"方块 {i} 状态设置为: {heartIcons[i].enabled}");
+                // 只有索引小于 count 的心才显示（比如 count 为 1，则只有 i=0 显示）
+                heartIcons[i].enabled = (i < count);
             }
         }
     }
+
+public void ShowCard()
+{
+    if (cardIcon != null) 
+    {
+        cardIcon.gameObject.SetActive(true); // 1. 激活整个物体
+        cardIcon.enabled = true;             // 2. 激活 Image 组件
+        Debug.Log("UI：卡片已成功显示！");   // 👈 如果控制台不打印这行，说明逻辑没跑到这
+    }
+    else
+    {
+        Debug.LogError("UI：没找到 cardIcon 引用！");
+    }
+}
 }
