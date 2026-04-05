@@ -20,7 +20,7 @@ public class CameraManager : MonoBehaviour
     
     [Header("相机参数")]
     public float mainCameraSize = 12f;  // 主相机视野大小
-    public float playerCameraSize = 8f; // 玩家相机视野大小
+    public float playerCameraSize = 10f; // 玩家相机视野大小
     
     public enum SplitScreenMode
     {

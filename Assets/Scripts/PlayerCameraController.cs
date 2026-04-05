@@ -14,7 +14,7 @@ public class PlayerCameraController : MonoBehaviour
     public int targetPlayerId = 1; // 1 = 玩家A, 2 = 玩家B
     
     [Header("相机参数")]
-    public float cameraSize = 8f;           // 相机视野大小
+    public float cameraSize = 10f;           // 相机视野大小
     public float smoothSpeed = 5f;          // 平滑跟随速度
     public float verticalOffset = 2f;       // 垂直偏移（让玩家在画面中心偏上）
     
